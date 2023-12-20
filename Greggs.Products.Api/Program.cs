@@ -1,10 +1,12 @@
 using Greggs.Products.Api.DataAccess;
 using Greggs.Products.Api.Extenstions;
+using Greggs.Products.Api.Middlewares;
 using Greggs.Products.Api.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using System;
 
 try
@@ -38,20 +40,26 @@ try
 
     #region Middlewares
     // Middlewares here
-    
+    app.UseMiddleware<LoggerHandler>();
+    app.UseMiddleware<ExceptionHandler>();
+
     #endregion
-    
+
     app.UseHttpsRedirection();
     app.AddCorsConfig();
     app.UseRouting();
     app.UseAuthorization();
     app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
-
+    app.UseMiddleware<ContentTypeHandler>();
     // Run the application.
     app.Run();
 }
 catch (Exception ex)
 {
-    Console.WriteLine(ex);
+    Log.Fatal(ex, "Greggs Product API terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
 }
