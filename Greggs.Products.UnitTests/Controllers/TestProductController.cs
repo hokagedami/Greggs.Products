@@ -24,9 +24,9 @@ public class TestProductController
             .AddEnvironmentVariables()
             .Build();
         var currencyService = new CurrencyService(configuration);
-        var productAccess = new ProductAccess();
+        var productAccess = new ProductAccess(Mock.Of<ILogger<ProductAccess>>());
         var productService = new ProductService(productAccess, currencyService);
-        _controller = new ProductController(Mock.Of<ILogger<ProductController>>() ,productService);
+        _controller = new ProductController(productService);
     }
     [Fact]
     public void TestGet()

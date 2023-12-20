@@ -14,6 +14,9 @@ public class CurrencyService: ICurrencyService
 
     public decimal Convert(decimal price, string baseCurrency, string targetCurrency)
     {
-        throw new NotImplementedException();
+        var baseCurrencyRates = _configuration[$"Rates:{baseCurrency}:{targetCurrency}"];
+        var rateIsDecimal = decimal.TryParse(baseCurrencyRates, out var rate);
+        if (!rateIsDecimal) throw new Exception($"{baseCurrency} to {targetCurrency} rate not found");
+        return Math.Round(price * rate, 2);
     }
 }

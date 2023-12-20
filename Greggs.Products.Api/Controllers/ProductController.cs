@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Greggs.Products.Api.Constants;
 using Greggs.Products.Api.Models;
 using Greggs.Products.Api.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Greggs.Products.Api.Controllers;
 
@@ -13,30 +12,37 @@ namespace Greggs.Products.Api.Controllers;
 [Route("[controller]")]
 public class ProductController : ControllerBase
 {
-    private static readonly string[] Products = new[]
-    {
-        "Sausage Roll", "Vegan Sausage Roll", "Steak Bake", "Yum Yum", "Pink Jammie"
-    };
-
-    private readonly ILogger<ProductController> _logger;
     private readonly IProductService _productService;
 
-    public ProductController(ILogger<ProductController> logger, IProductService productService)
+    public ProductController(IProductService productService)
     {
-        _logger = logger;
         _productService = productService;
     }
 
+    /// <summary>
+    ///     Get list of products
+    /// </summary>
+    /// <param name="pageStart"></param>
+    /// <param name="pageSize"></param>
+    /// <returns>
+    ///     Returns list of products
+    /// </returns>
+    /// <response code="200">Returns list of products</response>
+    /// <response code="400">If pageStart or pageSize is invalid</response>
+    /// <response code="500">If there is an internal server error</response>
     [HttpGet]
+    [SwaggerResponse(StatusCodes.Status200OK, "Returns list of products", typeof(ApiResponse<IEnumerable<Product>>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "If pageStart or pageSize is invalid", typeof(ApiResponse<string>))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "If there is an internal server error", typeof(ApiResponse<string>))]
     public ActionResult<ApiResponse<IEnumerable<Product>>> Get(int pageStart = 0, int pageSize = 5)
     {
         var products = _productService.GetProducts(pageStart, pageSize);
-        return Ok(new ApiResponse<IEnumerable<Product>>
+        return new ApiResponse<IEnumerable<Product>>
         {
             Data = products,
             HasErrors = false,
             Description = "Products retrieved successfully",
             Code = ApiResponseCodes.Success
-        });
+        };
     }
 }

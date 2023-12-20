@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Greggs.Products.Api.Constants;
 using Greggs.Products.Api.DataAccess;
@@ -20,6 +19,13 @@ public class ProductService: IProductService
 
     public IEnumerable<Product> GetProducts(int? pageStart, int? pageSize)
     {
-        throw new NotImplementedException();
+        return _dataAccess.List(pageStart, pageSize)
+            .Select(pr => new Product
+            {
+                Name = pr.Name,
+                PriceInPounds = pr.PriceInPounds,
+                PriceInEuro = _currencyService.Convert(pr.PriceInPounds,
+                    CurrencyCodes.GBP, CurrencyCodes.EUR)
+            }).AsEnumerable();
     }
 }
